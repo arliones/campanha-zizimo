@@ -118,6 +118,13 @@
       };
       reader.readAsDataURL(e.target.files[0]);
     };
+
+    function download() {
+      const link = document.createElement('a');
+      link.download = 'foto-campanha.png';
+      link.href = canvas.toDataURL();
+      link.click();
+    }
   </script>
 </body>
 </html>
