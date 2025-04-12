@@ -83,49 +83,41 @@
   <script>
     const canvas = document.getElementById('canvas');
     const ctx = canvas.getContext('2d');
-    let overlayLoaded = false;
     const overlay = new Image();
-    overlay.onload = function () {
-      overlayLoaded = true;
-    };
     overlay.src = 'logo-da-campanha.png';
 
     document.getElementById('upload').onchange = function (e) {
       const reader = new FileReader();
-      img.onload = function () {
-        const targetSize = 1080;
-        canvas.width = targetSize;
-        canvas.height = targetSize;
-        ctx.clearRect(0, 0, targetSize, targetSize);
+      reader.onload = function (event) {
+        const img = new Image();
+        img.onload = function () {
+          const targetSize = 1080;
+          canvas.width = targetSize;
+          canvas.height = targetSize;
+          ctx.clearRect(0, 0, targetSize, targetSize);
 
-        // Redimensionar e centralizar imagem do usuário
-        const scale = Math.min(targetSize / img.width, targetSize / img.height);
-        const newWidth = img.width * scale;
-        const newHeight = img.height * scale;
-        const xOffset = (targetSize - newWidth) / 2;
-        const yOffset = (targetSize - newHeight) / 2;
+          // Redimensionar e centralizar imagem do usuário
+          const scale = Math.min(targetSize / img.width, targetSize / img.height);
+          const newWidth = img.width * scale;
+          const newHeight = img.height * scale;
+          const xOffset = (targetSize - newWidth) / 2;
+          const yOffset = (targetSize - newHeight) / 2;
 
-        ctx.drawImage(img, xOffset, yOffset, newWidth, newHeight);
+          ctx.drawImage(img, xOffset, yOffset, newWidth, newHeight);
 
-        // Redesenha o overlay exatamente em 1080x1080
-        if (overlay.complete && overlay.naturalWidth > 0) {
-          ctx.drawImage(overlay, 0, 0, targetSize, targetSize);
-        } else {
-          overlay.onload = function () {
+          // Desenhar o overlay após garantir que está carregado
+          if (overlay.complete && overlay.naturalWidth !== 0) {
             ctx.drawImage(overlay, 0, 0, targetSize, targetSize);
-          };
-        }
+          } else {
+            overlay.onload = function () {
+              ctx.drawImage(overlay, 0, 0, targetSize, targetSize);
+            };
+          }
+        };
+        img.src = event.target.result;
       };
-
       reader.readAsDataURL(e.target.files[0]);
     };
-
-    function download() {
-      const link = document.createElement('a');
-      link.download = 'foto-campanha.png';
-      link.href = canvas.toDataURL();
-      link.click();
-    }
   </script>
 </body>
 </html>
