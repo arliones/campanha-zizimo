@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+  <meta charset="UTF-8">
+  <title>Adicione a marca da campanha à sua foto!</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      text-align: center;
+      padding: 2rem;
+    }
+    canvas {
+      max-width: 100%;
+      border: 1px solid #ccc;
+      margin-top: 1rem;
+    }
+    .btn {
+      background-color: #0055aa;
+      color: white;
+      padding: 0.75rem 1.5rem;
+      border: none;
+      border-radius: 8px;
+      font-size: 1rem;
+      cursor: pointer;
+      margin-top: 1rem;
+    }
+    .btn:hover {
+      background-color: #003f7f;
+    }
+  </style>
+</head>
+<body>
+  <h1>Coloque a marca da campanha na sua foto de perfil!</h1>
+  <input type="file" id="upload" accept="image/*" class="btn" />
+  <br />
+  <canvas id="canvas"></canvas>
+  <br />
+  <button class="btn" onclick="download()">Baixar imagem com a marca</button>
+
+  <script>
+    const canvas = document.getElementById('canvas');
+    const ctx = canvas.getContext('2d');
+    let overlayLoaded = false;
+    const overlay = new Image();
+    overlay.onload = function () {
+      overlayLoaded = true;
+    };
+    overlay.src = 'logo-da-campanha.png'; // Substitua por sua imagem real (com fundo transparente)
+
+    document.getElementById('upload').onchange = function (e) {
+      const reader = new FileReader();
+      reader.onload = function (event) {
+        const img = new Image();
+        img.onload = function () {
+          canvas.width = img.width;
+          canvas.height = img.height;
+          ctx.clearRect(0, 0, canvas.width, canvas.height);
+          ctx.drawImage(img, 0, 0);
+
+          if (overlayLoaded) {
+            ctx.drawImage(overlay, 0, 0, img.width, img.height);
+          } else {
+            overlay.onload = function () {
+              overlayLoaded = true;
+              ctx.drawImage(overlay, 0, 0, img.width, img.height);
+            };
+          }
+        };
+        img.src = event.target.result;
+      };
+      reader.readAsDataURL(e.target.files[0]);
+    };
+
+    function download() {
+      const link = document.createElement('a');
+      link.download = 'foto-campanha.png';
+      link.href = canvas.toDataURL();
+      link.click();
+    }
+  </script>
+</body>
+</html>
+
