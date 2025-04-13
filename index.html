@@ -86,6 +86,47 @@
     const overlay = new Image();
     overlay.src = 'logo-da-campanha3.png';
 
+    let userImage = null;
+    let newWidth = 0;
+    let newHeight = 0;
+    let imageX = 0;
+    let imageY = 0;
+    let isDragging = false;
+    let dragStartX = 0;
+    let dragStartY = 0;
+
+    function redrawCanvas() {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      if (userImage) {
+        ctx.drawImage(userImage, imageX, imageY, newWidth, newHeight);
+      }
+      if (overlay.complete && overlay.naturalWidth !== 0) {
+        ctx.drawImage(overlay, 0, 0, canvas.width, canvas.height);
+      }
+    }
+
+    canvas.addEventListener('mousedown', (e) => {
+      isDragging = true;
+      dragStartX = e.offsetX - imageX;
+      dragStartY = e.offsetY - imageY;
+    });
+
+    canvas.addEventListener('mousemove', (e) => {
+      if (isDragging) {
+        imageX = e.offsetX - dragStartX;
+        imageY = e.offsetY - dragStartY;
+        redrawCanvas();
+      }
+    });
+
+    canvas.addEventListener('mouseup', () => {
+      isDragging = false;
+    });
+
+    canvas.addEventListener('mouseleave', () => {
+      isDragging = false;
+    });
+
     document.getElementById('upload').onchange = function (e) {
       const reader = new FileReader();
       reader.onload = function (event) {
@@ -94,25 +135,15 @@
           const targetSize = 1080;
           canvas.width = targetSize;
           canvas.height = targetSize;
-          ctx.clearRect(0, 0, targetSize, targetSize);
 
-          // Redimensionar e centralizar imagem do usuário
+          userImage = img;
           const scale = Math.min(targetSize / img.width, targetSize / img.height);
-          const newWidth = img.width * scale;
-          const newHeight = img.height * scale;
-          const xOffset = (targetSize - newWidth) / 2;
-          const yOffset = (targetSize - newHeight) / 2;
+          newWidth = img.width * scale;
+          newHeight = img.height * scale;
+          imageX = (targetSize - newWidth) / 2;
+          imageY = (targetSize - newHeight) / 2;
 
-          ctx.drawImage(img, xOffset, yOffset, newWidth, newHeight);
-
-          // Desenhar o overlay após garantir que está carregado
-          if (overlay.complete && overlay.naturalWidth !== 0) {
-            ctx.drawImage(overlay, 0, 0, targetSize, targetSize);
-          } else {
-            overlay.onload = function () {
-              ctx.drawImage(overlay, 0, 0, targetSize, targetSize);
-            };
-          }
+          redrawCanvas();
         };
         img.src = event.target.result;
       };
